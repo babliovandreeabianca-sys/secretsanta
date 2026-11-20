@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secret Santa 🎅</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,.16) 0 2px, transparent 3px),
+      radial-gradient(circle at 80% 30%, rgba(255,255,255,.12) 0 2px, transparent 3px),
+      linear-gradient(135deg, #7b1020, #b51f35 55%, #64101d);
+    background-size: 90px 90px, 130px 130px, cover;
+    color: white;
+    display: flex;
+    justify-content: center;
+    padding: 35px 16px;
+  }
+  .snow { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  .snow span { position: absolute; top: -20px; color: white; opacity: .75; animation: fall linear infinite; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+  .card {
+    width: min(680px, 100%);
+    align-self: flex-start;
+    background: rgba(255,255,255,.96);
+    color: #292929;
+    border-radius: 28px;
+    padding: 34px;
+    box-shadow: 0 25px 80px rgba(0,0,0,.30);
+    text-align: center;
+  }
+  .santa { font-size: 64px; margin-bottom: 5px; }
+  h1 { margin: 0; color: #9d1730; font-size: clamp(32px, 8vw, 52px); }
+  .subtitle { color: #666; margin: 8px 0 28px; font-size: 16px; }
+
+  .notice {
+    background: #fff5e7;
+    border: 1px solid #f4d49e;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .names {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 18px 0 26px;
+  }
+  button.name {
+    border: 2px solid #eee;
+    background: white;
+    border-radius: 14px;
+    padding: 13px 10px;
+    font-size: 15px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: .18s;
+  }
+  button.name:hover { border-color: #bd263f; transform: translateY(-1px); }
+  button.name.selected { border-color: #bd263f; background: #fff0f3; color: #9d1730; }
+
+  #revealBtn {
+    width: 100%;
+    border: 0;
+    border-radius: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, #b51f35, #861126);
+    color: white;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(139,17,38,.28);
+  }
+  #revealBtn:disabled { opacity: .45; cursor: not-allowed; }
+
+  #result {
+    display: none;
+    margin-top: 24px;
+    padding: 24px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #fff8ec, #fff1f4);
+    border: 1px solid #f0d8c9;
+  }
+  #result .small { color: #777; font-size: 13px; }
+  #recipient { color: #9d1730; font-size: 34px; font-weight: 900; margin-top: 6px; }
+  .gift { font-size: 34px; margin-top: 5px; }
+  .warning { font-size: 12px; color: #888; margin-top: 16px; }
+
+  .footer { margin-top: 22px; color: #777; font-size: 12px; }
+
+  @media (max-width: 480px) {
+    .card { padding: 25px 18px; border-radius: 22px; }
+    .names { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="snow" id="snow"></div>
+
+<main class="card">
+  <div class="santa">🎅🎄</div>
+  <h1>Secret Santa</h1>
+  <p class="subtitle">Alege-ți numele și află cui trebuie să-i faci cadoul.</p>
+
+  <div class="notice">
+    🤫 <b>Regula de aur:</b> fiecare persoană își verifică doar propriul nume.
+    Nu arăta rezultatul celorlalți!
+  </div>
+
+  <div class="names" id="names"></div>
+
+  <button id="revealBtn" disabled>🎁 Arată-mi pe cine am primit</button>
+
+  <section id="result">
+    <div class="gift">🎁</div>
+    <div class="small">Cadoul tău este pentru:</div>
+    <div id="recipient"></div>
+    <div class="warning">Închide sau ascunde ecranul după ce ai văzut numele. 🤫</div>
+  </section>
+
+  <div class="footer">Secret Santa • 12 participanți</div>
+</main>
+
+<script>
+const participants = [
+  "Cristina", "Bianca", "Flori", "Olguta", "Elena", "Oti",
+  "Robi", "Calin", "Adriana", "Adi", "Lia", "Mada"
+];
+
+/*
+  Algoritmul este construit astfel încât:
+  - nimeni nu își primește propriul nume;
+  - Calin -> Adriana;
+  - Adriana -> Calin;
+  - ceilalți sunt într-un ciclu separat, pentru a evita duplicatele.
+*/
+const assignment = {
+  "Cristina": "Bianca",
+  "Bianca": "Flori",
+  "Flori": "Olguta",
+  "Olguta": "Elena",
+  "Elena": "Oti",
+  "Oti": "Robi",
+  "Robi": "Adi",
+  "Adi": "Lia",
+  "Lia": "Mada",
+  "Mada": "Cristina",
+  "Calin": "Adriana",
+  "Adriana": "Calin"
+};
+
+const namesBox = document.getElementById("names");
+const revealBtn = document.getElementById("revealBtn");
+const result = document.getElementById("result");
+const recipient = document.getElementById("recipient");
+let selected = null;
+
+participants.forEach(name => {
+  const btn = document.createElement("button");
+  btn.className = "name";
+  btn.textContent = name;
+  btn.onclick = () => {
+    document.querySelectorAll(".name").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selected = name;
+    revealBtn.disabled = false;
+    result.style.display = "none";
+  };
+  namesBox.appendChild(btn);
+});
+
+revealBtn.onclick = () => {
+  if (!selected) return;
+  recipient.textContent = assignment[selected];
+  result.style.display = "block";
+  result.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+for (let i = 0; i < 35; i++) {
+  const s = document.createElement("span");
+  s.textContent = Math.random() > .5 ? "❄" : "•";
+  s.style.left = Math.random() * 100 + "%";
+  s.style.fontSize = (8 + Math.random() * 14) + "px";
+  s.style.animationDuration = (5 + Math.random() * 8) + "s";
+  s.style.animationDelay = (-Math.random() * 10) + "s";
+  document.getElementById("snow").appendChild(s);
+}
+</script>
+</body>
+</html>
