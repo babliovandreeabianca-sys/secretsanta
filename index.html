@@ -3,196 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secret Santa 🎅</title>
+<title>Secret Santa 🎄</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background:
-      radial-gradient(circle at 15% 20%, rgba(255,255,255,.16) 0 2px, transparent 3px),
-      radial-gradient(circle at 80% 30%, rgba(255,255,255,.12) 0 2px, transparent 3px),
-      linear-gradient(135deg, #7b1020, #b51f35 55%, #64101d);
-    background-size: 90px 90px, 130px 130px, cover;
-    color: white;
-    display: flex;
-    justify-content: center;
-    padding: 35px 16px;
-  }
-  .snow { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
-  .snow span { position: absolute; top: -20px; color: white; opacity: .75; animation: fall linear infinite; }
-  @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
-
-  .card {
-    width: min(680px, 100%);
-    align-self: flex-start;
-    background: rgba(255,255,255,.96);
-    color: #292929;
-    border-radius: 28px;
-    padding: 34px;
-    box-shadow: 0 25px 80px rgba(0,0,0,.30);
-    text-align: center;
-  }
-  .santa { font-size: 64px; margin-bottom: 5px; }
-  h1 { margin: 0; color: #9d1730; font-size: clamp(32px, 8vw, 52px); }
-  .subtitle { color: #666; margin: 8px 0 28px; font-size: 16px; }
-
-  .notice {
-    background: #fff5e7;
-    border: 1px solid #f4d49e;
-    border-radius: 16px;
-    padding: 14px 16px;
-    margin-bottom: 24px;
-    font-size: 14px;
-    line-height: 1.45;
-  }
-
-  .names {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin: 18px 0 26px;
-  }
-  button.name {
-    border: 2px solid #eee;
-    background: white;
-    border-radius: 14px;
-    padding: 13px 10px;
-    font-size: 15px;
-    font-weight: 650;
-    cursor: pointer;
-    transition: .18s;
-  }
-  button.name:hover { border-color: #bd263f; transform: translateY(-1px); }
-  button.name.selected { border-color: #bd263f; background: #fff0f3; color: #9d1730; }
-
-  #revealBtn {
-    width: 100%;
-    border: 0;
-    border-radius: 16px;
-    padding: 16px;
-    background: linear-gradient(135deg, #b51f35, #861126);
-    color: white;
-    font-size: 17px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 10px 24px rgba(139,17,38,.28);
-  }
-  #revealBtn:disabled { opacity: .45; cursor: not-allowed; }
-
-  #result {
-    display: none;
-    margin-top: 24px;
-    padding: 24px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #fff8ec, #fff1f4);
-    border: 1px solid #f0d8c9;
-  }
-  #result .small { color: #777; font-size: 13px; }
-  #recipient { color: #9d1730; font-size: 34px; font-weight: 900; margin-top: 6px; }
-  .gift { font-size: 34px; margin-top: 5px; }
-  .warning { font-size: 12px; color: #888; margin-top: 16px; }
-
-  .footer { margin-top: 22px; color: #777; font-size: 12px; }
-
-  @media (max-width: 480px) {
-    .card { padding: 25px 18px; border-radius: 22px; }
-    .names { grid-template-columns: 1fr; }
-  }
-</style>
-</head>
-<body>
-<div class="snow" id="snow"></div>
-
-<main class="card">
-  <div class="santa">🎅🎄</div>
-  <h1>Secret Santa</h1>
-  <p class="subtitle">Alege-ți numele și află cui trebuie să-i faci cadoul.</p>
-
-  <div class="notice">
-    🤫 <b>Regula de aur:</b> fiecare persoană își verifică doar propriul nume.
-    Nu arăta rezultatul celorlalți!
-  </div>
-
-  <div class="names" id="names"></div>
-
-  <button id="revealBtn" disabled>🎁 Arată-mi pe cine am primit</button>
-
-  <section id="result">
-    <div class="gift">🎁</div>
-    <div class="small">Cadoul tău este pentru:</div>
-    <div id="recipient"></div>
-    <div class="warning">Închide sau ascunde ecranul după ce ai văzut numele. 🤫</div>
-  </section>
-
-  <div class="footer">Secret Santa • 12 participanți</div>
-</main>
-
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;overflow-x:hidden;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.13),transparent 35%),linear-gradient(150deg,#3d0c18,#7d1528 48%,#123f31)}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;background-image:radial-gradient(#fff 1px,transparent 1px),radial-gradient(#fff 1px,transparent 1px);background-size:70px 70px,110px 110px;background-position:10px 15px,45px 55px}
+.snow{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}.snow span{position:absolute;top:-30px;color:#fff;opacity:.8;animation:fall linear infinite}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+.wrap{position:relative;z-index:1;width:min(720px,100%);margin:auto;padding:28px 15px 45px}.card{position:relative;overflow:hidden;border-radius:30px;background:rgba(255,250,244,.97);color:#292929;padding:28px 24px 30px;box-shadow:0 25px 80px rgba(0,0,0,.38);border:2px solid rgba(255,255,255,.55)}
+.garland{position:absolute;left:0;right:0;top:0;height:48px;display:flex;justify-content:space-around;align-items:flex-start;padding:0 12px;pointer-events:none}.wire{position:absolute;left:0;right:0;top:7px;height:22px;border-top:3px solid #24553d;border-radius:50%}.bulb{position:relative;margin-top:14px;width:12px;height:19px;border-radius:50% 50% 45% 45%;background:#e7b84b;box-shadow:0 0 12px 5px rgba(231,184,75,.75);animation:blink 1.6s infinite alternate}.bulb:nth-child(3n){background:#d9364f;box-shadow:0 0 12px 5px rgba(217,54,79,.7);animation-delay:.4s}.bulb:nth-child(3n+1){background:#42a66f;box-shadow:0 0 12px 5px rgba(66,166,111,.7);animation-delay:.8s}@keyframes blink{from{opacity:.55;transform:scale(.9)}to{opacity:1;transform:scale(1.08)}}
+.header{text-align:center;padding:28px 5px 8px}.santa{font-size:62px;filter:drop-shadow(0 5px 4px rgba(0,0,0,.15));animation:bob 3s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-5px) rotate(-2deg)}}h1{margin:2px 0 0;color:#9d1730;font-size:clamp(36px,9vw,58px);font-weight:950;letter-spacing:-1.5px}.subtitle{margin:5px 0 25px;color:#6d6d6d;font-size:15px}
+.notice{display:flex;gap:10px;align-items:flex-start;background:linear-gradient(135deg,#fff5df,#fff0f3);border:1px solid #eed7c1;border-radius:18px;padding:15px 16px;margin-bottom:22px;font-size:13px;line-height:1.5;color:#555}.notice .icon{font-size:25px;line-height:1}
+.names{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:18px 0 24px}button.name{position:relative;overflow:hidden;border:2px solid #eadfda;border-radius:20px;min-height:82px;padding:12px 7px;background:linear-gradient(145deg,#fff,#fff7f1);color:#383838;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 7px 16px rgba(95,35,35,.10);transition:transform .22s,box-shadow .22s,border-color .22s,background .22s}button.name:before{content:"🎄";position:absolute;top:5px;right:7px;font-size:13px;opacity:.35}button.name:after{content:"";position:absolute;width:55px;height:55px;border-radius:50%;left:-35px;bottom:-38px;background:rgba(231,184,75,.16)}button.name:hover{transform:translateY(-5px) scale(1.015);border-color:#d8a83e;box-shadow:0 13px 28px rgba(120,48,48,.18)}button.name.selected{color:#fff;border-color:#e7b84b;background:linear-gradient(135deg,#9d1730,#b92b43);box-shadow:0 0 0 4px rgba(231,184,75,.23),0 12px 30px rgba(157,23,48,.34)}button.name.selected:before{opacity:1}
+#revealBtn{width:100%;border:0;border-radius:18px;padding:17px;background:linear-gradient(135deg,#17633f,#0d4730);color:#fff;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 10px 25px rgba(23,99,63,.28);transition:.2s}#revealBtn:not(:disabled):hover{transform:translateY(-2px)}#revealBtn:disabled{opacity:.42;cursor:not-allowed}
+#result{display:none;margin-top:22px;padding:25px 20px;border-radius:22px;text-align:center;background:linear-gradient(135deg,#fff8e9,#fff0f4);border:2px dashed #dfbd78;animation:pop .35s ease}@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}.gift{font-size:40px}#result .small{color:#777;font-size:13px}#recipient{color:#9d1730;font-size:34px;font-weight:950;margin-top:7px}.warning{font-size:12px;color:#888;margin-top:13px}
+.sticker{position:absolute;font-size:32px;z-index:2;filter:drop-shadow(0 3px 3px rgba(0,0,0,.12))}.s1{left:14px;top:62px}.s2{right:15px;top:69px}.s3{left:13px;bottom:20px}.s4{right:12px;bottom:22px}.footer{text-align:center;margin-top:18px;color:#777;font-size:11px}
+@media(max-width:560px){.card{padding:25px 17px 27px;border-radius:25px}.names{grid-template-columns:repeat(2,1fr);gap:11px}button.name{min-height:78px}.santa{font-size:54px}}
+</style></head>
+<body><div class="snow" id="snow"></div><div class="wrap"><main class="card">
+<div class="garland"><div class="wire"></div><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span></div>
+<div class="sticker s1">🎁</div><div class="sticker s2">❄️</div><div class="sticker s3">🍪</div><div class="sticker s4">🎄</div>
+<header class="header"><div class="santa">🎅</div><h1>Secret Santa</h1><p class="subtitle">Alege-ți numele și descoperă pentru cine pregătești cadoul. 🎁</p></header>
+<div class="notice"><div class="icon">🤫</div><div><b>Regula de aur:</b> apasă doar pe numele tău și nu arăta rezultatul nimănui.</div></div>
+<div class="names" id="names"></div><button id="revealBtn" disabled>🎁 &nbsp; Arată-mi pe cine am primit</button>
+<section id="result"><div class="gift">🎁✨</div><div class="small">Cadoul tău este pentru:</div><div id="recipient"></div><div class="warning">🤫 Păstrează secretul!</div></section>
+<div class="footer">🎄 Secret Santa • 12 participanți • 🎄</div></main></div>
 <script>
-const participants = [
-  "Cristina", "Bianca", "Flori", "Olguta", "Elena", "Oti",
-  "Robi", "Calin", "Adriana", "Adi", "Lia", "Mada"
-];
-
-/*
-  Algoritmul este construit astfel încât:
-  - nimeni nu își primește propriul nume;
-  - Calin -> Adriana;
-  - Adriana -> Calin;
-  - ceilalți sunt într-un ciclu separat, pentru a evita duplicatele.
-*/
-const assignment = {
-  "Cristina": "Bianca",
-  "Bianca": "Flori",
-  "Flori": "Olguta",
-  "Olguta": "Elena",
-  "Elena": "Oti",
-  "Oti": "Robi",
-  "Robi": "Adi",
-  "Adi": "Lia",
-  "Lia": "Mada",
-  "Mada": "Cristina",
-  "Calin": "Adriana",
-  "Adriana": "Calin"
-};
-
-const namesBox = document.getElementById("names");
-const revealBtn = document.getElementById("revealBtn");
-const result = document.getElementById("result");
-const recipient = document.getElementById("recipient");
-let selected = null;
-
-participants.forEach(name => {
-  const btn = document.createElement("button");
-  btn.className = "name";
-  btn.textContent = name;
-  btn.onclick = () => {
-    document.querySelectorAll(".name").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-    selected = name;
-    revealBtn.disabled = false;
-    result.style.display = "none";
-  };
-  namesBox.appendChild(btn);
-});
-
-revealBtn.onclick = () => {
-  if (!selected) return;
-  recipient.textContent = assignment[selected];
-  result.style.display = "block";
-  result.scrollIntoView({ behavior: "smooth", block: "center" });
-};
-
-for (let i = 0; i < 35; i++) {
-  const s = document.createElement("span");
-  s.textContent = Math.random() > .5 ? "❄" : "•";
-  s.style.left = Math.random() * 100 + "%";
-  s.style.fontSize = (8 + Math.random() * 14) + "px";
-  s.style.animationDuration = (5 + Math.random() * 8) + "s";
-  s.style.animationDelay = (-Math.random() * 10) + "s";
-  document.getElementById("snow").appendChild(s);
-}
-</script>
-</body>
-</html>
+const participants=["Cristina","Bianca","Flori","Olguta","Elena","Oti","Robi","Calin","Adriana","Adi","Lia","Mada"];
+const assignment={"Cristina":"Bianca","Bianca":"Flori","Flori":"Olguta","Olguta":"Elena","Elena":"Oti","Oti":"Robi","Robi":"Adi","Adi":"Lia","Lia":"Mada","Mada":"Cristina","Calin":"Adriana","Adriana":"Calin"};
+const namesBox=document.getElementById("names"),revealBtn=document.getElementById("revealBtn"),result=document.getElementById("result"),recipient=document.getElementById("recipient");let selected=null;
+participants.forEach(name=>{const btn=document.createElement("button");btn.className="name";btn.textContent=name;btn.onclick=()=>{document.querySelectorAll(".name").forEach(b=>b.classList.remove("selected"));btn.classList.add("selected");selected=name;revealBtn.disabled=false;result.style.display="none"};namesBox.appendChild(btn)});
+revealBtn.onclick=()=>{if(!selected)return;recipient.textContent=assignment[selected];result.style.display="block";result.scrollIntoView({behavior:"smooth",block:"center"})};
+for(let i=0;i<42;i++){const s=document.createElement("span");s.textContent=Math.random()>.35?"❄":"•";s.style.left=Math.random()*100+"%";s.style.fontSize=(8+Math.random()*15)+"px";s.style.animationDuration=(5+Math.random()*9)+"s";s.style.animationDelay=(-Math.random()*12)+"s";document.getElementById("snow").appendChild(s)}
+</script></body></html>
