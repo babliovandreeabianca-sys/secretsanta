@@ -17,20 +17,97 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;ba
 #result{display:none;margin-top:22px;padding:25px 20px;border-radius:22px;text-align:center;background:linear-gradient(135deg,#fff8e9,#fff0f4);border:2px dashed #dfbd78;animation:pop .35s ease}@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}.gift{font-size:40px}#result .small{color:#777;font-size:13px}#recipient{color:#9d1730;font-size:34px;font-weight:950;margin-top:7px}.warning{font-size:12px;color:#888;margin-top:13px}
 .sticker{position:absolute;font-size:32px;z-index:2;filter:drop-shadow(0 3px 3px rgba(0,0,0,.12))}.s1{left:14px;top:62px}.s2{right:15px;top:69px}.s3{left:13px;bottom:20px}.s4{right:12px;bottom:22px}.footer{text-align:center;margin-top:18px;color:#777;font-size:11px}
 @media(max-width:560px){.card{padding:25px 17px 27px;border-radius:25px}.names{grid-template-columns:repeat(2,1fr);gap:11px}button.name{min-height:78px}.santa{font-size:54px}}
+
+.access{margin:18px 0 8px}.access label{display:block;font-weight:800;color:#6b2635;margin:0 0 8px;font-size:14px}
+#personalCode{width:100%;border:2px solid #eadfda;border-radius:15px;padding:15px 14px;font-size:17px;outline:none;background:#fff;color:#292929;letter-spacing:2px}
+#personalCode:focus{border-color:#d8a83e;box-shadow:0 0 0 4px rgba(231,184,75,.18)}
+#revealBtn{margin-top:12px}#status{min-height:18px;text-align:center;color:#8b2639;font-size:13px;margin:10px 0 0}
 </style></head>
 <body><div class="snow" id="snow"></div><div class="wrap"><main class="card">
 <div class="garland"><div class="wire"></div><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span></div>
 <div class="sticker s1">🎁</div><div class="sticker s2">❄️</div><div class="sticker s3">🍪</div><div class="sticker s4">🎄</div>
-<header class="header"><div class="santa">🎅</div><h1>Secret Santa</h1><p class="subtitle">Alege-ți numele și descoperă pentru cine pregătești cadoul. 🎁</p></header>
-<div class="notice"><div class="icon">🤫</div><div><b>Regula de aur:</b> apasă doar pe numele tău și nu arăta rezultatul nimănui.</div></div>
-<div class="names" id="names"></div><button id="revealBtn" disabled>🎁 &nbsp; Arată-mi pe cine am primit</button>
+<header class="header"><div class="santa">🎅</div><h1>Secret Santa</h1><p class="subtitle">Introdu codul tău personal și descoperă pentru cine pregătești cadoul. 🎁</p></header>
+<div class="notice"><div class="icon">🤫</div><div><b>Regula de aur:</b> fiecare participant folosește doar codul primit în privat. Nu distribui codul nimănui.</div></div>
+<div class="names" id="names"></div>
+<div class="access">
+  <label for="personalCode">Codul tău personal</label>
+  <input id="personalCode" type="password" inputmode="text" autocomplete="one-time-code" placeholder="Introdu codul primit" maxlength="80">
+  <button id="revealBtn" disabled>🎁 &nbsp; Arată-mi pe cine am primit</button>
+  <p id="status" role="status" aria-live="polite"></p>
+</div>
 <section id="result"><div class="gift">🎁✨</div><div class="small">Cadoul tău este pentru:</div><div id="recipient"></div><div class="warning">🤫 Păstrează secretul!</div></section>
 <div class="footer">🎄 Secret Santa • 12 participanți • 🎄</div></main></div>
 <script>
+/*
+  CONFIGURARE:
+  Înlocuiește URL-ul de mai jos cu URL-ul funcției backend după ce o publici.
+  Nu introduce aici lista perechilor și nu pune chei secrete în acest fișier.
+*/
+const REVEAL_API_URL = "https://YOUR-PROJECT.supabase.co/functions/v1/reveal";
+
 const participants=["Cristina","Bianca","Flori","Olguta","Elena","Oti","Robi","Calin","Adriana","Adi","Lia","Mada"];
-const assignment={"Cristina":"Bianca","Bianca":"Flori","Flori":"Olguta","Olguta":"Elena","Elena":"Oti","Oti":"Robi","Robi":"Adi","Adi":"Lia","Lia":"Mada","Mada":"Cristina","Calin":"Adriana","Adriana":"Calin"};
-const namesBox=document.getElementById("names"),revealBtn=document.getElementById("revealBtn"),result=document.getElementById("result"),recipient=document.getElementById("recipient");let selected=null;
-participants.forEach(name=>{const btn=document.createElement("button");btn.className="name";btn.textContent=name;btn.onclick=()=>{document.querySelectorAll(".name").forEach(b=>b.classList.remove("selected"));btn.classList.add("selected");selected=name;revealBtn.disabled=false;result.style.display="none"};namesBox.appendChild(btn)});
-revealBtn.onclick=()=>{if(!selected)return;recipient.textContent=assignment[selected];result.style.display="block";result.scrollIntoView({behavior:"smooth",block:"center"})};
-for(let i=0;i<42;i++){const s=document.createElement("span");s.textContent=Math.random()>.35?"❄":"•";s.style.left=Math.random()*100+"%";s.style.fontSize=(8+Math.random()*15)+"px";s.style.animationDuration=(5+Math.random()*9)+"s";s.style.animationDelay=(-Math.random()*12)+"s";document.getElementById("snow").appendChild(s)}
+const namesBox=document.getElementById("names");
+const revealBtn=document.getElementById("revealBtn");
+const codeInput=document.getElementById("personalCode");
+const result=document.getElementById("result");
+const recipient=document.getElementById("recipient");
+const statusBox=document.getElementById("status");
+
+participants.forEach(name=>{
+  const tile=document.createElement("div");
+  tile.className="name";
+  tile.textContent=name;
+  tile.setAttribute("aria-label",name);
+  namesBox.appendChild(tile);
+});
+
+codeInput.addEventListener("input",()=>{
+  revealBtn.disabled=codeInput.value.trim().length<6;
+  result.style.display="none";
+  recipient.textContent="";
+  statusBox.textContent="";
+});
+
+revealBtn.onclick=async()=>{
+  const code=codeInput.value.trim();
+  if(!code)return;
+  revealBtn.disabled=true;
+  revealBtn.textContent="⏳ Verificăm codul...";
+  statusBox.textContent="";
+  result.style.display="none";
+  try{
+    if(REVEAL_API_URL.includes("YOUR-PROJECT")){
+      throw new Error("Site-ul nu este încă conectat la sistemul securizat. Urmează configurarea backend-ului.");
+    }
+    const response=await fetch(REVEAL_API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({code})
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error||"Cod invalid sau indisponibil. Verifică-l și încearcă din nou.");
+    if(typeof data.recipient!=="string"||!participants.includes(data.recipient)){
+      throw new Error("Răspuns invalid de la server. Te rugăm să contactezi organizatorul.");
+    }
+    recipient.textContent=data.recipient;
+    result.style.display="block";
+    result.scrollIntoView({behavior:"smooth",block:"center"});
+    statusBox.textContent="Extragerea a fost afișată.";
+  }catch(error){
+    statusBox.textContent=error.message||"A apărut o eroare. Încearcă din nou.";
+  }finally{
+    revealBtn.disabled=codeInput.value.trim().length<6;
+    revealBtn.textContent="🎁  Arată-mi pe cine am primit";
+  }
+};
+
+for(let i=0;i<42;i++){
+  const s=document.createElement("span");
+  s.textContent=Math.random()>.35?"❄":"•";
+  s.style.left=Math.random()*100+"%";
+  s.style.fontSize=(8+Math.random()*15)+"px";
+  s.style.animationDuration=(5+Math.random()*9)+"s";
+  s.style.animationDelay=(-Math.random()*12)+"s";
+  document.getElementById("snow").appendChild(s);
+}
 </script></body></html>
